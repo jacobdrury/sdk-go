@@ -69,9 +69,19 @@ func invoke(restateCtx *ctx, handler Handler, logger *slog.Logger) {
 
 	restateCtx.internalLogger.InfoContext(restateCtx, "Handling invocation")
 
+	// Store handler options so Run closures can inherit the error handler
+	restateCtx.handlerOptions = handler.GetOptions()
+
 	var bytes []byte
 	var err error
 	bytes, err = handler.Call(restateCtx, restateCtx.request.Body)
+
+	if err != nil {
+		opts := handler.GetOptions()
+		if opts.ErrorHandler != nil {
+			err = opts.ErrorHandler(err)
+		}
+	}
 
 	if err != nil && errors.IsTerminalError(err) {
 		restateCtx.internalLogger.LogAttrs(restateCtx, slog.LevelWarn, "Invocation returned a terminal failure", log.Error(err))

@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+type HandlerFunc func(error) error
+
 type Code uint16
 
 type CodeError struct {

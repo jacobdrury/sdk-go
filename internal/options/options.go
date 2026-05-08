@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/restatedev/sdk-go/encoding"
+	"github.com/restatedev/sdk-go/internal/errors"
 )
 
 // OnMaxAttempts determines behavior when max attempts is reached.
@@ -209,6 +210,8 @@ type RunOptions struct {
 
 	// Codec used to encode/decode the run result.
 	Codec encoding.Codec
+
+	ErrorHandler errors.HandlerFunc
 }
 
 type RunOption interface {
@@ -235,6 +238,7 @@ type HandlerOptions struct {
 	JournalRetention      *time.Duration
 	WorkflowRetention     *time.Duration
 	InvocationRetryPolicy *InvocationRetryPolicy
+	ErrorHandler          errors.HandlerFunc
 }
 
 type HandlerOption interface {
@@ -253,6 +257,7 @@ type ServiceDefinitionOptions struct {
 	IngressPrivate        *bool
 	JournalRetention      *time.Duration
 	InvocationRetryPolicy *InvocationRetryPolicy
+	ErrorHandler          errors.HandlerFunc
 }
 
 type ServiceDefinitionOption interface {

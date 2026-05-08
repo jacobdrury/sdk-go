@@ -91,6 +91,9 @@ type ctx struct {
 	// Run implementation
 	runClosures           map[uint32]func() *pbinternal.VmProposeRunCompletionParameters
 	runClosureCompletions chan *pbinternal.VmProposeRunCompletionParameters
+
+	// Handler options - used to inherit error handler in Run closures
+	handlerOptions *options.HandlerOptions
 }
 
 var _ Context = (*ctx)(nil)

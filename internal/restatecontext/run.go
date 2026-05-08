@@ -77,6 +77,16 @@ func (restateCtx *ctx) runAsync(goCtx context.Context, fn func(ctx RunContext) (
 			proposal.SetRetryPolicy(&retryPolicy)
 		}
 
+		if err != nil {
+			errorHandler := o.ErrorHandler
+			if errorHandler == nil && restateCtx.handlerOptions != nil {
+				errorHandler = restateCtx.handlerOptions.ErrorHandler
+			}
+			if errorHandler != nil {
+				err = errorHandler(err)
+			}
+		}
+
 		if errors.IsTerminalError(err) {
 			// Terminal error
 			failure := pbinternal.Failure{}

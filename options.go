@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/restatedev/sdk-go/encoding"
+	"github.com/restatedev/sdk-go/internal/errors"
 	"github.com/restatedev/sdk-go/internal/options"
 )
 
@@ -641,4 +642,30 @@ type withAuthKey struct {
 
 func (w withAuthKey) BeforeIngress(opts *options.IngressClientOptions) {
 	opts.AuthKey = w.authKey
+}
+
+func WithErrorHandler(errorHandler ErrorHandler) withErrorHandler {
+	return withErrorHandler{errorHandler}
+}
+
+type ErrorHandler = errors.HandlerFunc
+
+type withErrorHandler struct {
+	errorHandler ErrorHandler
+}
+
+var _ options.ServiceDefinitionOption = withErrorHandler{}
+var _ options.HandlerOption = withErrorHandler{}
+var _ options.RunOption = withErrorHandler{}
+
+func (w withErrorHandler) BeforeServiceDefinition(opts *options.ServiceDefinitionOptions) {
+	opts.ErrorHandler = w.errorHandler
+}
+
+func (w withErrorHandler) BeforeHandler(opts *options.HandlerOptions) {
+	opts.ErrorHandler = w.errorHandler
+}
+
+func (w withErrorHandler) BeforeRun(opts *options.RunOptions) {
+	opts.ErrorHandler = w.errorHandler
 }

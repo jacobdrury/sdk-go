@@ -15,6 +15,8 @@ import (
 	"strings"
 	"time"
 
+	restate_errors "github.com/restatedev/sdk-go/internal/errors"
+
 	restate "github.com/restatedev/sdk-go"
 	"github.com/restatedev/sdk-go/internal"
 	pbinternal "github.com/restatedev/sdk-go/internal/generated"
@@ -66,6 +68,7 @@ type Restate struct {
 	keyIDs         []string
 	keySet         identity.KeySetV1
 	protocolMode   internal.ProtocolMode
+	errorHandler   restate_errors.HandlerFunc
 }
 
 // NewRestate creates a new instance of Restate server
@@ -98,6 +101,11 @@ func (r *Restate) WithIdentityV1(keys ...string) *Restate {
 	return r
 }
 
+func (r *Restate) WithErrorHandler(handler restate_errors.HandlerFunc) *Restate {
+	r.errorHandler = handler
+	return r
+}
+
 // Bidirectional is used to change the protocol mode advertised to Restate on discovery
 // In bidirectional mode, Restate will keep the request body open even after we have started to respond,
 // allowing for more work to be done without suspending.
@@ -118,6 +126,18 @@ func (r *Restate) Bind(definition restate.ServiceDefinition) *Restate {
 		// panic because this is a programming error
 		// to register multiple definitions with the same name
 		panic("service definition with the same name exists")
+	}
+
+	// Propagate server-level error handler to service if not already set
+	if r.errorHandler != nil && definition.GetOptions().ErrorHandler == nil {
+		definition.GetOptions().ErrorHandler = r.errorHandler
+	}
+
+	// Propagate service-level error handler to handlers that don't have one
+	for _, handler := range definition.Handlers() {
+		if handler.GetOptions().ErrorHandler == nil && definition.GetOptions().ErrorHandler != nil {
+			handler.GetOptions().ErrorHandler = definition.GetOptions().ErrorHandler
+		}
 	}
 
 	r.definitions[definition.Name()] = definition

@@ -91,6 +91,9 @@ func (r *service) Handler(name string, handler restatecontext.Handler) *service 
 	if handler.GetOptions().Codec == nil {
 		handler.GetOptions().Codec = r.options.DefaultCodec
 	}
+	if handler.GetOptions().ErrorHandler == nil {
+		handler.GetOptions().ErrorHandler = r.options.ErrorHandler
+	}
 	r.handlers[name] = handler
 	return r
 }
@@ -126,6 +129,9 @@ func (r *object) Handler(name string, handler restatecontext.Handler) *object {
 	if handler.GetOptions().Codec == nil {
 		handler.GetOptions().Codec = r.options.DefaultCodec
 	}
+	if handler.GetOptions().ErrorHandler == nil {
+		handler.GetOptions().ErrorHandler = r.options.ErrorHandler
+	}
 	r.handlers[name] = handler
 	return r
 }
@@ -157,6 +163,9 @@ func NewWorkflow(name string, opts ...options.ServiceDefinitionOption) *workflow
 func (r *workflow) Handler(name string, handler restatecontext.Handler) *workflow {
 	if handler.GetOptions().Codec == nil {
 		handler.GetOptions().Codec = r.options.DefaultCodec
+	}
+	if handler.GetOptions().ErrorHandler == nil {
+		handler.GetOptions().ErrorHandler = r.options.ErrorHandler
 	}
 	r.handlers[name] = handler
 	return r
